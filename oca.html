@@ -50,7 +50,7 @@ font-size:2em;
 </style>
     <div class="container">
         <div class="well span9 columns center">
-            <div id="myCarousel" class="carousel slide" data-interval="false">
+            <div id="myCarousel" class="carousel slide" data-interval="false" data-wrap="false">
                 <div class="carousel-inner">
                     <form>
                         <div class="carousel-item active">
@@ -59,22 +59,22 @@ font-size:2em;
 							</div>
 							<div class="radioGroupBelow">
 							  <div class="form-check form-check-inline custom btn btn-info">
-                                <label class="form-check-label" for="q1-1"><input class="form-check-input" type="radio" name="q1" id="q1-1" value="1" onclick="$('.carousel').carousel('next')" >
-                                Yes</label>
-                              </div>
-                              <div class="form-check form-check-inline custom btn btn-info">
-                                <label class="form-check-label" for="q1-2"><input class="form-check-input" type="radio" name="q1" id="q1-2" value="2" onclick="$('.carousel').carousel('next')">
-                                Maybe</label>
-                              </div>
-                              <div class="form-check form-check-inline custom btn btn-info">
-                                <label class="form-check-label" for="q1-3"><input class="form-check-input" type="radio" name="q1" id="q1-3" value="3" onclick="$('.carousel').carousel('next')">
-                                No</label>
-                              </div>
+                    <input class="form-check-input" type="radio" name="q1" id="q1-1" value="1" onclick="$('.carousel').carousel('next')">
+                    <label class="form-check-label" for="q1-1">Yes</label>
+                  </div>
+                  <div class="form-check form-check-inline custom btn btn-info">
+                    <input class="form-check-input" type="radio" name="q1" id="q1-2" value="2" onclick="$('.carousel').carousel('next')">
+                    <label class="form-check-label" for="q1-2">Maybe</label>
+                  </div>
+                  <div class="form-check form-check-inline custom btn btn-info">
+                    <input class="form-check-input" type="radio" name="q1" id="q1-3" value="3" onclick="$('.carousel').carousel('next')">
+                    <label class="form-check-label" for="q1-3">No</label>
+                  </div>
 							</div>
                         </div>
 						<div class="carousel-item">
                            <div class="question">
-								<p>2. When others are getting rattled do you remain fairly composed <br>Do you make thoughtless remarks or accusations which you later regret?</p>
+								<p>2. When others are getting rattled do you remain fairly composed?</p>
 							</div>
 							<div class="radioGroupBelow">
 							  <div class="form-check form-check-inline custom btn btn-info">
@@ -165,8 +165,8 @@ font-size:2em;
 					
 				</div>
 				<div class="CarNav">
-                <a class="left carousel-control btn btn-success" href="#myCarousel" data-slide="prev">‹ BACK</a>
-                <a class="right carousel-control btn btn-success" href="#myCarousel" data-slide="next">NEXT ›</a>
+                <a id="left-button" class="left carousel-control btn btn-success" href="#myCarousel" data-slide="prev" style="display: none;">‹ BACK</a>
+                <a id="right-button" class="right carousel-control btn btn-success" href="#myCarousel" data-slide="next">NEXT ›</a>
                 </div>
             </div>
         </div>
@@ -186,52 +186,61 @@ font-size:2em;
     <script>
         var totalItems = $('.carousel-item').length - 1;
         var currentIndex = $('div.active').index() + 1;
-        var lastkey = 0;
+        
         $('.num').html('' + currentIndex + '/' + totalItems + '');
+        var pct = (currentIndex / totalItems) * 100;
+        $('.progress-bar').css('width', pct + '%');
 
+        function is_question_filled(n) {
+          return ($('#q'+n+'-1').prop("checked") 
+            || $('#q'+n+'-2').prop("checked") 
+            || $('#q'+n+'-3').prop("checked")) ? true: false;
+        }
 
         $(document).keyup(function(e) {
-        // don't run for the last slide!!
-        if ($('div.active').index() == totalItems) return;
-
-        if(e.key == 1) {
-            // $("span").text(i += 1);
-            lastkey = 1;
+          if(e.key == 1) {
+              $('#q'+currentIndex+'-1').prop("checked", true);
+              $('.carousel').carousel('next');
+          } else if(e.key == 2) {
+              $('#q'+currentIndex+'-2').prop("checked", true);
+              $('.carousel').carousel('next');
+          } else if(e.key == 3) {
+              $('#q'+currentIndex+'-3').prop("checked", true);
+              $('.carousel').carousel('next');
+          } else if(e.key == 'ArrowLeft') {
+              $('.carousel').carousel('prev');
+          } else if(e.key == 'ArrowRight') {
+            if (!is_question_filled(currentIndex)) {
+              alert('Please complete the question!');
+              return;
+            }
             $('.carousel').carousel('next');
-            $('#q'+currentIndex+'-1').prop("checked", true);
-        } else if(e.key == 2) {
-            // $("span").text(i += 5);
-            lastkey = 2;
-            $('.carousel').carousel('next');
-            $('#q'+currentIndex+'-2').prop("checked", true);
-        } else if(e.key == 3) {
-            // $("span").text(i += 10);
-            lastkey = 3;
-            $('.carousel').carousel('next');
-            $('#q'+currentIndex+'-3').prop("checked", true);
-        } else if(e.key == 'ArrowLeft') {
-            // $("span").text(i += 10);
-            $('.carousel').carousel('prev');
-        } else if(e.key == 'ArrowRight') {
-            // $("span").text(i += 10);
-            lastkey = 3;
-            $('.carousel').carousel('next');
-        }
+          }
         });
 
-        $('#myCarousel').on('slide.bs.carousel', function () {
-            currentIndex = $('div.active').index() + 1;
-            // console.log('slide'+'#q'+currentIndex+'-'+lastkey);
-            $('.num').html('' + currentIndex + '/' + totalItems + '');
-            //$('#q'+lastIndex).val(lastkey);
-            var pct = (currentIndex / totalItems) * 100;
-            $('.progress-bar').css('width', pct + '%');
-        })
+        $('#right-button').on('click', function (e) {
+          if (!is_question_filled(currentIndex)) {
+            alert('Please complete the question!');
+            e.stopPropagation();
+          }
+        });
 
-        $('#myCarousel').on('slid.bs.carousel', function () {
-            currentIndex = $('div.active').index() + 1;
-            if (currentIndex <= totalItems) 
-                $('.num').html('' + currentIndex + '/' + totalItems + '');
+        $('#myCarousel').on('slide.bs.carousel', function (e) {
+          if (e.to > 0) $('#left-button').show(); else $('#left-button').hide();
+          currentIndex = e.to + 1;
+
+          if (currentIndex <= totalItems) {
+            $('#right-button').show();
+
+            // Set counter
+            $('.num').html('' + currentIndex + '/' + totalItems + '');
+
+            // Set progress bar
+            pct = (currentIndex / totalItems) * 100;
+            $('.progress-bar').css('width', pct + '%');
+          } else {
+            $('#right-button').hide();
+          }
         })
     </script>
 
