@@ -431,6 +431,11 @@ top: 30%;
         }
 
         $(document).keyup(function(e) {
+          if ($('#modal').is(':visible')) {
+            $('#modal').modal('hide');
+            return;
+          }
+
           if(e.key == 1) {
               $('#q'+currentIndex+'-1').prop("checked", true);
               $('.carousel').carousel('next');
